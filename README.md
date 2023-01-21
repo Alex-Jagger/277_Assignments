@@ -20,5 +20,5 @@
  4. Put subsystems(model reference) insdie /lib
  5. Put test models inside /test
  6. Define global constants in /src/init.m using structures
- 
+ 7. Make changes on individual branches first then merge to main
  
