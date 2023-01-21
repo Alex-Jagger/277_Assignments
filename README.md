@@ -22,3 +22,6 @@
  6. Define global constants in /src/init.m using structures
  7. Make changes on individual branches first then merge to main
  
+ ## Note
+ 1. Make sure there is no the absolute path of the repo doesn't contain spaces
+ 2. For Monitor & Tune mode, rember to chose the correct COM port
