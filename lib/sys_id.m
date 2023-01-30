@@ -1,27 +1,24 @@
 % Input:
-%   input: Input signal
-%   response: Response signal
+%   name: name of the response and input timeseries
 %   Tss: Sensor sampling time
 % Output: 
 %   sys: Fitted system
 %   kapa: System gain
 %   tau: System time constant
-function [system,kapa,tau] = sys_id(name,Tss)
-load(name);
+function [system, my_iddata, kapa,tau] = sys_id(name,Tss)
+load(name, "data")
 time = data{2}.Values.Time;
 response = data{2}.Values.Data;
 step = data{1}.Values.Data;
 
 index_temp = time >= 10;
-time = time(index_temp);
 response = response(index_temp);
 step = step(index_temp);
-data= iddata(response, step,Tss);
-tau_init = 42076.6;
-kapa_init = 79.0012;
-sys_init = idtf(tau_init, [kapa_init 1 0]);
-system = tfest(data, sys_init);
-kapa = system.Numerator;
-tau = system.Denominator(2);
-
+my_iddata= iddata(response, step,Tss);
+tau_init = 2;
+kapa_init = 500;
+sys_init = idtf(kapa_init, [tau_init 1 0]);
+system = tfest(my_iddata, 2, 0);
+kapa = system.Numerator/system.Denominator(2);
+tau = 1/system.Denominator(2);
 end

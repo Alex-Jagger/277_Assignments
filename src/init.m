@@ -14,7 +14,7 @@ savepath
 %% Parameter
 
 % Encoder
-param.encoder.freq = 1e5;
+param.encoder.freq = 1e4;
 param.encoder.Tss = 1/param.encoder.freq;
 param.encoder.resol = 2000;
 param.encoder.cnt_init = 2^24;
