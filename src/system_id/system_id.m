@@ -5,13 +5,16 @@ clear; close all; clc
 init
 Tss = param.encoder.Tss;
 
-% mode = "data_collection";
+mode = "data_collection";
 % mode = "signal_id";
 % mode = "analysis";
-mode = "friction calculation"
+% mode = "friction calculation"
+
 % input_signal = "step";
 % input_signal = "chirp";
-input_signal = "friction";
+% input_signal = "friction";
+input_signal = "free"
+
 rod = "_rod_";
 % rod = "_nrod_";
 
@@ -30,12 +33,12 @@ stepsize = 0.7;
 chirp_init_freq = 10;
 chirp_target_freq = 100;
 
-run = "_1";
+run_num = "_1";
 
 switch input_signal
     case "step"
         input_signal_type = 1;
-        data_file_name = input_signal + rod + erase(num2str(stepsize), '.') + run + ".mat"
+        data_file_name = input_signal + rod + erase(num2str(stepsize), '.') + run_num + ".mat"
         switch rod
             case "_rod_"
                 time_final = 15;
@@ -46,11 +49,15 @@ switch input_signal
         input_signal_type = 2;
         time_final = 50;
         data_file_name = input_signal + rod + erase(num2str(stepsize), '.') + '_' + ...
-            erase(num2str(chirp_init_freq), '.') + '_' + erase(num2str(chirp_target_freq), '.') + run + ".mat"
+            erase(num2str(chirp_init_freq), '.') + '_' + erase(num2str(chirp_target_freq), '.') + run_num + ".mat"
     case "friction"
         input_signal_type = 3;
         time_final = 19;
-        data_file_name = input_signal +'_'+ erase(num2str(stepsize), '.') + run + ".mat";
+        data_file_name = input_signal +'_'+ erase(num2str(stepsize), '.') + run_num + ".mat";
+    case "free"
+        input_signal_type = 4;
+        time_final = 10000;
+        data_file_name = input_signal + run_num + ".mat";        
 end
 id_file_name = "id_result_" + data_file_name;
 %%
