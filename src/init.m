@@ -20,7 +20,7 @@ param.encoder.resol = 2000;
 param.encoder.cnt_init = 2^24;
 
 % PMW
-param.pwm.Ts =  1e-05;
+param.pwm.Ts =  1e-5;
 param.pwm.timer_period = floor(1e8*param.pwm.Ts/2);
 param.pwm.set_point = floor(param.pwm.timer_period/2);
 %%
