@@ -25,4 +25,8 @@ param.pwm.timer_period = floor(1e8*param.pwm.Ts/2);
 param.pwm.set_point = floor(param.pwm.timer_period/2);
 
 % Virtual Plant
+param.vp.R = 4.6;                   % Ohm
+% param.vp.J_rod = 1/12*
+% J_rotor = J_motor + J_rod
+% J_pend = J_rotor + l_c^2*J_rod
 param.vp.J_rotor = 2.3270e-05;      % kg*m^2
