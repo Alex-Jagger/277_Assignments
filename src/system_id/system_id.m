@@ -5,15 +5,16 @@ clear; close all; clc
 init
 Tss = param.encoder.Tss;
 
-mode = "data_collection";
+
+% mode = "data_collection";
 % mode = "signal_id";
-% mode = "analysis";
+mode = "analysis";
 % mode = "friction calculation"
 
 % input_signal = "step";
 % input_signal = "chirp";
-% input_signal = "friction";
-input_signal = "free"
+input_signal = "friction";
+% input_signal = "free"
 
 rod = "_rod_";
 % rod = "_nrod_";
@@ -34,7 +35,7 @@ chirp_init_freq = 10;
 chirp_target_freq = 100;
 
 run_num = "_1";
-
+%% This section is for data collection
 switch input_signal
     case "step"
         input_signal_type = 1;
@@ -60,7 +61,7 @@ switch input_signal
         data_file_name = input_signal + run_num + ".mat";        
 end
 id_file_name = "id_result_" + data_file_name;
-%%
+%% For post-data analysis
 switch mode
     case "data_collection"
         disp("Run system_id_sim.slx to collect data");
@@ -69,8 +70,6 @@ switch mode
         load(data_file_name, 'data');
         output = sys_id(data,Tss, input_signal);
         save("../../data/system_id_data/" + id_file_name, "output");
-    case "friction calculation"
-        friction_analysis
     case "analysis"
         system_id_analysis
     otherwise

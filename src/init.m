@@ -23,4 +23,6 @@ param.encoder.cnt_init = 2^24;
 param.pwm.Ts =  1e-5;
 param.pwm.timer_period = floor(1e8*param.pwm.Ts/2);
 param.pwm.set_point = floor(param.pwm.timer_period/2);
-%%
+
+% Virtual Plant
+param.vp.J_rotor = 2.3270e-05;      % kg*m^2

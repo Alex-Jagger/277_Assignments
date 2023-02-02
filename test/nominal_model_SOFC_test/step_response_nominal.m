@@ -37,9 +37,9 @@ Friction_static = 4E-4; %Static friction Nm
 K_pend =0;
 Stepsize= 1;
 J_pend =J_rotor;
-load('../../data/nominal_model_SOFC_parmeters.mat')
+% load('../../data/nominal_model_SOFC_parmeters.mat')
 
-SOFC(G, Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl)
+% SOFC(G, Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl)
 %%
 % steptime = 10;
 % stepinput = 1;
