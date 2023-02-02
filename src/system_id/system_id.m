@@ -1,15 +1,15 @@
-% System ID
-%%
+%% System ID
 clear; close all; clc
-%%
 init
 Tss = param.encoder.Tss;
-
+%% Test parameter set up
 
 % mode = "data_collection";
 % mode = "signal_id";
 mode = "analysis";
 % mode = "friction calculation"
+
+% Choose a setting for data collection and system id
 
 % input_signal = "step";
 % input_signal = "chirp";
@@ -35,7 +35,7 @@ chirp_init_freq = 10;
 chirp_target_freq = 100;
 
 run_num = "_1";
-%% This section is for data collection
+%% Prepare for different modes
 switch input_signal
     case "step"
         input_signal_type = 1;
@@ -61,7 +61,7 @@ switch input_signal
         data_file_name = input_signal + run_num + ".mat";        
 end
 id_file_name = "id_result_" + data_file_name;
-%% For post-data analysis
+%% Start different modes
 switch mode
     case "data_collection"
         disp("Run system_id_sim.slx to collect data");
