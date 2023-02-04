@@ -7,14 +7,13 @@ Tss = param.encoder.Tss;
 % mode = "data_collection";
 % mode = "signal_id";
 mode = "analysis";
-% mode = "friction calculation"
 
 % Choose a setting for data collection and system id
 
 % input_signal = "step";
 % input_signal = "chirp";
-input_signal = "friction";
-% input_signal = "free"
+% input_signal = "friction";
+input_signal = "free"
 
 rod = "_rod_";
 % rod = "_nrod_";
@@ -34,7 +33,7 @@ stepsize = 0.7;
 chirp_init_freq = 10;
 chirp_target_freq = 100;
 
-run_num = "_1";
+run_num = "_2";
 %% Prepare for different modes
 switch input_signal
     case "step"
@@ -53,7 +52,7 @@ switch input_signal
             erase(num2str(chirp_init_freq), '.') + '_' + erase(num2str(chirp_target_freq), '.') + run_num + ".mat"
     case "friction"
         input_signal_type = 3;
-        time_final = 19;
+        time_final = 30;
         data_file_name = input_signal +'_'+ erase(num2str(stepsize), '.') + run_num + ".mat";
     case "free"
         input_signal_type = 4;

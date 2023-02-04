@@ -17,10 +17,10 @@ output_chirp_rod_05_10_100_1 = output_chirp_rod_05_10_100_1.output;
 output_chirp_rod_05_0001_01_1 = load("id_result_chirp_rod_05_0001_01_1.mat");
 output_chirp_rod_05_0001_01_1 = output_chirp_rod_05_0001_01_1.output;
 
-data_friction_07_1 = load("friction_07_1.mat");
-data_friction_07_1 = data_friction_07_1.data;
+data_friction_07_2 = load("friction_07_2.mat");
+data_friction_07_2 = data_friction_07_2.data;
 
-data_free = load('free_1.mat');
+data_free = load('free_2.mat');
 data_free = data_free.data;
 %% Calculate the statistics of kappa from different experiments
 Kapa_pos = [output_step_rod_03_1.kapa_pos; ...
@@ -185,9 +185,11 @@ LinesAx2(4).LineWidth = lw1;
 LinesAx2(5).LineWidth = lw2;       
 %% 
 figure; hold on; grid on
-plot(data_free.duty_cycle, data_free.Vs, '.', 'MarkerSize', 20)
+plot(data_free.dc, data_free.V, '.', 'MarkerSize', 20)
 title('Duty Cycle vs Armature Voltage')
 xlabel('Input (Duty Cycle)')
 ylabel('Voltage (V)')
+mean(data_free.V(27:35)./data_free.dc(27:35))
+plot(data_free.dc, 1.2912e+04*data_free.dc)
 %%
 friction_analysis
