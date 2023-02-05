@@ -5,21 +5,27 @@ run('init.m')
 
 Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
 
+kapa=542.8;
+tau=0.4563;
+
 %Motor and Pendulum Parameters:
+b = 0;              % Motor-rotor viscous damping
+R = 4.6;             % (Ohms)Motor coil resistant
+L = 0.23e-3;          %(Henry) Motor coil inductance (xxx)
+V_s = 12.91  ;    %(V)Supply voltage of the motor drive (H-bridge)
+K_m = V_s/kapa ;       %(Nm/A) Motor torque constant
+
 m=4.6*1E-2;       %(kg) Mass of pendulum
 g=9.812;           %(m/s^2) Gravitational acceleration
 l_c=2.54*1E-2;     %(m)Distance from pivot joint to the center of pendulum rod
 J_rodc=2.36*1E-5;  %(kgm^2) Moment of inertia of pendulum about center of rod
 % J_motor=1.67*1E-6; %(kgm^2)  Moment of inertia of motor rotor
-J_rotor = 3.7624*1E-5;    %(kgm^2)Moment of inertia of inertia mode of system
+J_rotor = tau/R*K_m^2;    %(kgm^2)Moment of inertia of inertia mode of system
 J_motor = J_rotor - J_rodc;
 J_pend=J_rotor+m*l_c^2 ;   %(kgm^2) Moment of inertia of pendulum mode of system
 
-b = 0;              % Motor-rotor viscous damping
-R = 4.6;             % (Ohms)Motor coil resistant
-L = 0.23e-3;          %(Henry) Motor coil inductance (xxx)
-K_m = 0.0195 ;       %(Nm/A) Motor torque constant
-V_s = 10.57  ;    %(V)Supply voltage of the motor drive (H-bridge)
+
+
 % input d = Duty cycle
 % output (rad) - Angle of pendulum
 
@@ -30,27 +36,28 @@ deadzone = 0.05;    % PWM switcing short circuit protection results in 4% duty c
 Tss= 1/10000;       % 10kHz Encoder sampling rate by FPGA
 encoder_resolution= 2*pi/2000;  % Encoder resolution 2000 counts/revolutin
 
-Angle_Pendu=0/180*pi;   %pendulum equlibrium position, 0 is vertically down, 180 is up
+Angle_Pendu=180/180*pi;   %pendulum equlibrium position, 0 is vertically down, 180 is up
 K_g =  m*g*l_c;
 K_sin = cos(Angle_Pendu);  %linearization sin(angle)
 Friction_static = 3.93E-4; %Static friction
+% Friction_static = 0;
 Friction_viscous = 8.347E-7; %Viscous friction
 Friction_aerodynamic = 8.765E-9; %Aerodynamics friction
 
-K_pend =0;
-Stepsize= 1;
+% K_pend =0;
+% Stepsize= 0.5;
 mode_all = ["rotor","pendulum"];
 mode = mode_all(1); % Selct different mode to present different task
 
 switch(mode)
-    case {'pendulum'}
-        K_pend = 1;
-        Stepsize = pi;  %Stepsize= Angle_Pendu;
-        
     case {'rotor'}
         K_pend =0;  %K_pend=0 for the rotor mode
-        Stepsize= 1;
+        Stepsize= 0.5;
         J_pend =J_rotor;  % If this is for the rotor, treat as a special case of pendulum
+
+    case {'pendulum'}
+        K_pend = 1;
+        Stepsize = 0;  %Stepsize= Angle_Pendu;
 end
 K_tot = K_g*K_sin*K_pend;
 s = tf('s');
@@ -64,8 +71,7 @@ F_rotorfull=(L*s+R)/(K_m*V_s);
 P_penduposfull= P_rotorposfull/(1+K_tot*P_rotorposfull*F_rotorfull); % Full Linear Sys
 
 %Reduced order motor-rotor model for control design (second order, assuming b=0,L=0):
-kapa=V_s/K_m;
-tau=J_pend*R/K_m^2;
+
 P_rotorred=kapa/(tau*s+1);
 P_rotorposred=P_rotorred/s;
 F_rotorred=R/(K_m*V_s);
@@ -90,7 +96,7 @@ Plant = tf(G);
 Plant_d = tf(G_d);
 
 Zeta_obs = 1; % Observer Damping Ratio
-Wn_obs = 100*2*pi; % Observer Natural Frequency
+Wn_obs = 1000*2*pi; % Observer Natural Frequency
 Tr_ctl = 0.05; % Rise time 0.05
 Mp_ctl = 15/100; % Maximum percent overshoot 15%
 
