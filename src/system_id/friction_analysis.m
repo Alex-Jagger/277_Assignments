@@ -46,6 +46,10 @@ plot(vel_response, F_friction(x, vel_response), "LineWidth", 3)
 disp("Static(Coulomb) Friction Coefficient: " + num2str(x(1)))
 disp("Viscous Friction Coefficient: " + num2str(x(2)))
 disp("Aerodynamic Friction Coefficient: " + num2str(x(3)))
+
+%%
+omega_span = linspace(0.1, 600, 6);
+friction_span = F_friction(x, omega_span);
 %%
 function [signal_smooth, time_out] = smooth_signal(signal, time, n)
     signal_smooth = zeros(length(signal) - n + 1, n);
