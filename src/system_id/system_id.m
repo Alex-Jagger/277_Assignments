@@ -4,9 +4,9 @@ init
 Tss = param.encoder.Tss;
 %% Test parameter set up
 
-% mode = "data_collection";
+mode = "data_collection";
 % mode = "signal_id";
-mode = "analysis";
+% mode = "analysis";
 
 % Choose a setting for data collection and system id
 
