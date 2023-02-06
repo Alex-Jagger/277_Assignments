@@ -3,7 +3,7 @@ clear; close all; clc
 run('init.m')
 %% Our Virtual Plant
 
-Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
+Ts = 0.01;  %digital control sampling time 0.1/0.01/0.001
 
 kapa=542.8;
 tau=0.4563;
@@ -47,7 +47,7 @@ Friction_aerodynamic = 8.765E-9; %Aerodynamics friction
 % K_pend =0;
 % Stepsize= 0.5;
 mode_all = ["rotor","pendulum"];
-mode = mode_all(1); % Selct different mode to present different task
+mode = mode_all(2); % Selct different mode to present different task
 
 switch(mode)
     case {'rotor'}
@@ -57,7 +57,7 @@ switch(mode)
 
     case {'pendulum'}
         K_pend = 1;
-        Stepsize = 0;  %Stepsize= Angle_Pendu;
+        Stepsize = 0.5;  %Stepsize= Angle_Pendu;
 end
 K_tot = K_g*K_sin*K_pend;
 s = tf('s');
