@@ -1,7 +1,8 @@
 %% System ID
 clear; close all; clc
 init
-Tss = param.encoder.Tss;
+load_hardware_parameters;
+Tss = encoder_Tss;
 %% Test parameter set up
 
 % mode = "data_collection";

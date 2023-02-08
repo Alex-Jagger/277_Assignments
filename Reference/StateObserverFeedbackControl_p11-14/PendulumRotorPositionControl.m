@@ -7,8 +7,8 @@ bdclose('all')
 close ALL;
 clear ALL;
 
-plant = 'rotor';
-%plant = 'pendulum';   %Plant model is linearized at specified equlibrium angle
+% plant = 'rotor';
+plant = 'pendulum';   %Plant model is linearized at specified equlibrium angle
 
 pend = 1; %1: single pendulum for this file 2: double pendulum not implemented
 
@@ -54,7 +54,7 @@ Friction_static = 4E-4; %Static friction Nm
 switch(plant)
     case {'pendulum'}
         K_pend = 1;
-        Stepsize = pi;  %Stepsize= Angle_Pendu;
+        Stepsize = 1;  %Stepsize= Angle_Pendu;
         
     case {'rotor'}
         K_pend =0;  %K_pend=0 for the rotor mode

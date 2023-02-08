@@ -52,7 +52,7 @@ switch input_signal
         F_pos = @(x, xdata) (x(1)*xdata + x(1)*x(2)*exp(-xdata/x(2)) - x(1)*x(2))*stepsize;
         
         x0 = [kapa_pos,tau_pos];
-        x = lsqcurvefit(F_pos,x0,time,pos_response);
+        x = lsqcurvefit(F_pos,x0,titme,pos_response);
         kapa_pos_fit = x(1);
         tau_pos_fit = x(2);
         

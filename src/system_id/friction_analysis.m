@@ -28,7 +28,9 @@ vel_response = vel_response(1:end-n2);
 % title('Friction Test, Acceleration vs Time')
 % xlabel('Time (sec)')
 % ylabel('Acceleration (rad/sec^{2})')
-torque_response = abs(acc_response)*param.vp.J_rotor;
+
+load_our_parameters
+torque_response = abs(acc_response)*J_rotor;
 
 subplot(2, 1, 2); hold on; grid on
 plot(vel_response, torque_response, 'LineWidth', 3)

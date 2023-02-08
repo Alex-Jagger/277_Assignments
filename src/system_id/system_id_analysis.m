@@ -151,10 +151,12 @@ xlabel('Input (Duty Cycle)')
 ylabel('\tau (sec)')
 title('\tau from Different Methods')
 %% Calculate our kapa and tau
-kapa_model = kapa_vel_fit_mean;
-tau_model = tau_vel_fit_mean;
+kapa = kapa_vel_fit_mean;
+tau = tau_vel_fit_mean;
+
+save("..\..\data\kapa_tau_system_id", "kapa", "tau");
 %% Plot our kapa_model tau_model bode along with chirp responses bode
-sys_model = tf(kapa_model, [tau_model 1])
+sys_model = tf(kapa, [tau 1])
 figure; hold on; grid on
 my_bode = bodeplot(sys_model);
 
@@ -185,11 +187,13 @@ LinesAx2(4).LineWidth = lw1;
 LinesAx2(5).LineWidth = lw2;       
 %% 
 figure; hold on; grid on
-plot(data_free.dc, data_free.V, '.', 'MarkerSize', 20)
+plot(data_free.dc, data_free.V*1e-3, '.', 'MarkerSize', 20)
 title('Duty Cycle vs Armature Voltage')
 xlabel('Input (Duty Cycle)')
 ylabel('Voltage (V)')
-mean(data_free.V(27:35)./data_free.dc(27:35))
-plot(data_free.dc, 1.2912e+04*data_free.dc)
+V_s = 1e-3*mean(data_free.V(27:35)./data_free.dc(27:35))
+plot(data_free.dc, 12.912*data_free.dc)
+
+save("..\..\data\V_s_system_id", "V_s")
 %%
 friction_analysis
