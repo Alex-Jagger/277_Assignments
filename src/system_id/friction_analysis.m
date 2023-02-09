@@ -45,6 +45,7 @@ n_throw = 1;
 x = lsqcurvefit(F_friction, x0, vel_response(n_throw:end), torque_response(n_throw:end));
 plot(vel_response, F_friction(x, vel_response), "LineWidth", 3)
 
+% friction_static
 disp("Static(Coulomb) Friction Coefficient: " + num2str(x(1)))
 disp("Viscous Friction Coefficient: " + num2str(x(2)))
 disp("Aerodynamic Friction Coefficient: " + num2str(x(3)))

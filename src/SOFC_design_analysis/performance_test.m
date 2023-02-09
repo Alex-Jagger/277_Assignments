@@ -1,6 +1,7 @@
 clear; close all; clc
 %%
 init
+load_hardware_parameters
 %%
 mode_all = ["rotor","pend0", "pend180"];
 mode = mode_all(3); % Selct different mode to present different task

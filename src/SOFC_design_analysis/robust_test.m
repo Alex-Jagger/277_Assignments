@@ -4,7 +4,7 @@ init
 load_hardware_parameters
 %%
 mode_all = ["pend0", "pend180"];
-mode = mode_all(1); % Selct different mode to present different task
+mode = mode_all(2); % Selct different mode to present different task
 
 Ts_all = [0.001 0.01 0.1];
 Ts = Ts_all(2);
