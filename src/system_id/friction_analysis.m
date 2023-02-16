@@ -50,6 +50,10 @@ disp("Static(Coulomb) Friction Coefficient: " + num2str(x(1)))
 disp("Viscous Friction Coefficient: " + num2str(x(2)))
 disp("Aerodynamic Friction Coefficient: " + num2str(x(3)))
 
+friction_static = x(1);
+friction_viscous = x(2);
+friction_aero = x(3);
+save("../../data/friction_system_id", "friction_aero", 'friction_viscous', "friction_static");
 %%
 omega_span = linspace(0.1, 600, 6);
 friction_span = F_friction(x, omega_span);

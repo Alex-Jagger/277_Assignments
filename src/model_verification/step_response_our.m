@@ -3,13 +3,11 @@ clear; close all; clc
 init
 %% Our Virtual Plant %Simulation Time = 5s
 
-Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
+Ts = 0.01;  %digital control sampling time 0.1/0.01/0.001
 load_our_parameters
 
 %Parameters in the virtual plant simulation:
 Tcomp=0.0005*Ts*14;  %controller computation delay (less than one sampling interval)
-saturation =1.0;    %PWM duty cycle is between - and 100% and polarity
-deadzone = 0.05;    % PWM switcing short circuit protection results in 4% duty cycle deadzone
 Tss= 1/10000;       % 10kHz Encoder sampling rate by FPGA
 encoder_resolution= 2*pi/2000;  % Encoder resolution 2000 counts/revolutin
 
@@ -19,11 +17,13 @@ K_g =  m*g*l_c;
 K_sin = cos(Angle_Pendu);  %linearization sin(angle)
 
 % Lookup Table for Nonlinear Parameters
-V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
-DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
-friction_static = 3.93E-4; %Static friction
-friction_viscous = 8.347E-7; %Viscous friction
-friction_aero = 8.765E-9; %Aerodynamics friction
+% V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
+% DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
+% friction_static = 3.93E-4; %Static friction
+% friction_viscous = 8.347E-7; %Viscous friction
+% friction_aero = 8.765E-9; %Aerodynamics friction
+% V_table = [-10.8,-10.8,-2,-1,-0,0,0,1,2,10.8,10.8];
+% DC_table = [-1,-0.96,-0.1,-0.06,-0.04,0,0.04,0.06,0.1,0.96,1];
 
 Mode_all = ["rotor","pendulum"];
 Mode = Mode_all(2); % Selct different mode to present different task
@@ -34,7 +34,7 @@ switch(Mode)
         Stepsize = 0.5;  %Stepsize = Angle_Pendu;
         stepsize = '0_5';
         mode = 'pendulum';
-        
+        J_pend = J_rotor + m*l_c^2;
     case {'rotor'}
         K_pend = 0;  %K_pend=0 for the rotor mode
         Stepsize = 0.5;  %Stepsize = Duty Cycle(openloop); Angle(SOFC): 0.5 & 1?;

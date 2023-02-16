@@ -192,8 +192,16 @@ title('Duty Cycle vs Armature Voltage')
 xlabel('Input (Duty Cycle)')
 ylabel('Voltage (V)')
 V_s = 1e-3*mean(data_free.V(27:35)./data_free.dc(27:35))
-plot(data_free.dc, 12.912*data_free.dc)
+plot(data_free.dc, V_s*data_free.dc)
+skip = 1;
+% DC_table = [-data_free.dc(end:-skip:2) flip(data_free.dc(end:-skip:1))];
+% V_table = [-data_free.V(end:-skip:2) flip(data_free.V(end:-skip:1))]*1e-3;
 
-save("..\..\data\V_s_system_id", "V_s")
+DC_table = [-data_free.dc(end:-skip:2) flip(data_free.dc(end:-skip:1))];
+V_table = [-data_free.V(end:-skip:2) flip(data_free.V(end:-skip:1))]*1e-3;
+
+figure; hold on; grid on
+plot(DC_table, V_table, 'x')
+save("..\..\data\V_s_system_id", "V_s", "V_table", "DC_table")
 %%
 friction_analysis

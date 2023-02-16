@@ -3,7 +3,7 @@
 % run('init.m')
 %% Nominal Virtual Plant
 
-Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
+Ts = 0.01;  %digital control sampling time 0.1/0.01/0.001
 
 %Motor and Pendulum Parameters:
 m=4.4*1E-2;       %(kg) Mass of pendulum
@@ -37,10 +37,12 @@ K_sin = cos(Angle_Pendu);  %linearization sin(angle)
 % Lookup Table for Nonlinear Parameters
 V_table = [-10.8,-10.8,-2,-1,-0,0,0,1,2,10.8,10.8];
 DC_table = [-1,-0.96,-0.1,-0.06,-0.04,0,0.04,0.06,0.1,0.96,1];
-Friction_static = 4E-4; %Static friction Nm
-
+% Friction_static = 4E-4; %Static friction Nm
+friction_static = 3.93E-4; %Static friction
+friction_viscous = 0; %Viscous friction
+friction_aero = 0; %Aerodynamics friction
 Mode_all = ["rotor","pendulum"];
-Mode = Mode_all(1); % Selct different mode to present different task
+Mode = Mode_all(2); % Selct different mode to present different task
 
 switch(Mode)
     case {'pendulum'}
