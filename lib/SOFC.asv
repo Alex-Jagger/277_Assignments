@@ -62,22 +62,14 @@ switch(design)
         Loop_SF = ss(Aaug,Baug,K_aug,0,Ts);    
 
     case{'SOFCIO'}
-        f = 2 * pi;
-        osi_c = f / (s*(s^2 + f));
+        osi_c = 1 / (s*(s^2 + 1));
         osi_d = c2d(osi_c,Ts,'zoh');
-        [num,dem] = tfdata(osi_d);
         [Ad,Bd,Cd,~] = ssdata(osi_d);
-        Aaug = [A_d, zeros(size(A_d,1),size(Ad,2));Bd * C_d,Ad];
-        Baug = [B_d;zeros(size(Bd))];
-        gamma = [0.9,0.8,0.7];
-        pole_int = gamma*max(abs(pole_z_ctl));
-        pole_z_ctl_int= [pole_z_ctl, pole_int];
-        K_aug=acker(Aaug,Baug,pole_z_ctl_int);
-        K_SF=K_aug(1:size(A_d,1));
-        K_int = K_aug(size(A_d,1)+1:size(K_aug,2));
-
+        Aaug = [A_d, zeros(size(B_d));Bd * C_d,Ad];
+        Baug = [B_d,zeros(Bd)];
+        gama = 0.8;
+        num_of_poles = size(Bd);
         
-
 
 
 
