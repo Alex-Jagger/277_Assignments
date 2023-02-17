@@ -3,7 +3,7 @@ clear; close all; clc
 init
 %% Our Virtual Plant %Simulation Time = 5s
 
-Ts = 0.01;  %digital control sampling time 0.1/0.01/0.001
+Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
 load_our_parameters
 
 %Parameters in the virtual plant simulation:
@@ -17,16 +17,16 @@ K_g =  m*g*l_c;
 K_sin = cos(Angle_Pendu);  %linearization sin(angle)
 
 % Lookup Table for Nonlinear Parameters
-% V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
-% DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
-% friction_static = 3.93E-4; %Static friction
-% friction_viscous = 8.347E-7; %Viscous friction
-% friction_aero = 8.765E-9; %Aerodynamics friction
+V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
+DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
+friction_static = 3.93E-4; %Static friction
+friction_viscous = 8.347E-7; %Viscous friction
+friction_aero = 8.765E-9; %Aerodynamics friction
 % V_table = [-10.8,-10.8,-2,-1,-0,0,0,1,2,10.8,10.8];
 % DC_table = [-1,-0.96,-0.1,-0.06,-0.04,0,0.04,0.06,0.1,0.96,1];
 
 Mode_all = ["rotor","pendulum"];
-Mode = Mode_all(2); % Selct different mode to present different task
+Mode = Mode_all(1); % Selct different mode to present different task
 
 switch(Mode)
     case {'pendulum'}
@@ -71,16 +71,17 @@ Plant = tf(G);
 Plant_d = tf(G_d);
 
 Zeta_obs = 1; % Observer Damping Ratio
-Wn_obs = 100*2*pi; % Observer Natural Frequency
-Tr_ctl = 0.05; % Rise time 0.05
-Mp_ctl = 15/100; % Maximum percent overshoot 15%
+Wn_obs = 120*2*pi; % Observer Natural Frequency
+Tr_ctl = 0.08; % Rise time 0.05
+Mp_ctl = 10/100; % Maximum percent overshoot 15%
 
 design_lib = ["SOFC","SOFCI"];
-design = design_lib(1);
+design = design_lib(2);
 
 [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF] = SOFC(G,...
     Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design); %Get controller gain, observer gain and feedforward gain
 
+K_aug = [K_SF,K_int];
 TF_yr=TF(1,1)  ;
 TF_ur=TF(2,1)  ;
 TF_er=TF(3,1)  ;

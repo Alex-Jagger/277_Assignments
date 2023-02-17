@@ -44,17 +44,18 @@ switch(design)
     case{'SOFCI'}
         Aaug=[A_d zeros(size(B_d)); C_d 1];
         Baug=[B_d;0];
-        gamma = 0.9;    %0<gamma<1 to select integrator pole faster than SF pole
+        gamma = 0.7;    %0<gamma<1 to select integrator pole faster than SF pole
         pole_int = gamma*max(abs(pole_z_ctl));
         pole_z_ctl_int= [pole_z_ctl, pole_int];
         K_aug=acker(Aaug,Baug,pole_z_ctl_int);
         K_SF=K_aug(1:size(A_d,1));
         K_int = K_aug(size(A_d,1)+1:size(K_aug,2));
-                
+        Bd = 1;
+        Ad = 1;
         TF_yrf=ss(A_d-B_d*K_SF,B_d,C_d,0,Ts);
         N=1/freqresp(TF_yrf,0);  % With integra action, N does not affect steady state, but on transient response
                 
-        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; C_d, 1, zeros(size(C_d)); zeros(size(A_d)), zeros(size(B_d)), A_d-L_Pred*C_d];
+        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; C_d, Ad, zeros(size(C_d)); zeros(size(A_d)), zeros(size(B_d)), A_d-L_Pred*C_d];
         BB= [B_d*N, B_d, Bw;-1., 0, 0; zeros(size(B_d)), B_d, Bw];
         CC= [C_d, 0, zeros(size(C_d)); -K_SF, -K_int, K_SF; -C_d, 0, zeros(size(C_d))];
         DD= [0 0 0; N 0 0;1, 0 0];

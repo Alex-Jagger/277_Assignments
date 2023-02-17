@@ -3,7 +3,7 @@
 % run('init.m')
 %% Nominal Virtual Plant
 
-Ts = 0.01;  %digital control sampling time 0.1/0.01/0.001
+Ts = 0.001;  %digital control sampling time 0.1/0.01/0.001
 
 %Motor and Pendulum Parameters:
 m=4.4*1E-2;       %(kg) Mass of pendulum
@@ -42,7 +42,7 @@ friction_static = 3.93E-4; %Static friction
 friction_viscous = 0; %Viscous friction
 friction_aero = 0; %Aerodynamics friction
 Mode_all = ["rotor","pendulum"];
-Mode = Mode_all(2); % Selct different mode to present different task
+Mode = Mode_all(1); % Selct different mode to present different task
 
 switch(Mode)
     case {'pendulum'}
@@ -90,7 +90,7 @@ Plant_d = tf(G_d);
 
 Zeta_obs = 1; % Observer Damping Ratio
 Wn_obs = 100*2*pi; % Observer Natural Frequency
-Tr_ctl = 0.1; % Rise time is changed to 0.1 (originally 0.05)
+Tr_ctl = 0.05; % Rise time is changed to 0.1 (originally 0.05)
 Mp_ctl = 15/100; % Maximum percent overshoot 15%
 
 design_lib = ["SOFC","SOFCI"];
