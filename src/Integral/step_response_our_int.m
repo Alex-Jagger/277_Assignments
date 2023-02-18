@@ -26,7 +26,7 @@ friction_aero = 8.765E-9; %Aerodynamics friction
 % DC_table = [-1,-0.96,-0.1,-0.06,-0.04,0,0.04,0.06,0.1,0.96,1];
 
 Mode_all = ["rotor","pendulum"];
-Mode = Mode_all(1); % Selct different mode to present different task
+Mode = Mode_all(2); % Selct different mode to present different task
 
 switch(Mode)
     case {'pendulum'}
@@ -71,14 +71,14 @@ Plant = tf(G);
 Plant_d = tf(G_d);
 
 Zeta_obs = 1; % Observer Damping Ratio
-Wn_obs = 120*2*pi; % Observer Natural Frequency
+Wn_obs = 150*2*pi; % Observer Natural Frequency
 Tr_ctl = 0.08; % Rise time 0.05
 Mp_ctl = 10/100; % Maximum percent overshoot 15%
 
 design_lib = ["SOFC","SOFCI","SOFCIO"];
-design = design_lib(3);
+design = design_lib(2);
 
-[L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem] = SOFC(G,...
+[L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
     Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design); %Get controller gain, observer gain and feedforward gain
 
 K_aug = [K_SF,K_int];

@@ -10,13 +10,14 @@
 %   L_Pred: Observer gain
 %   K_SF: Control gain
 %   opt: Optional outputs
-function [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem] = SOFC(G,...
+function [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
     Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design)
 
 G_d = c2d(G, Ts, 'zoh');
 [A_d, B_d, C_d, ~] = ssdata(G_d);
 Bw = F_rotorred*B_d;
-
+Ad = 1;
+Bd = 1;
 pole_s_obs = [(-Zeta_obs + sqrt(Zeta_obs^2-1))*Wn_obs,...
     (-Zeta_obs-sqrt(Zeta_obs^2-1))*Wn_obs];
 pole_z_obs = exp(pole_s_obs*Ts);
@@ -54,33 +55,38 @@ switch(design)
         dem = [1,-1];
         TF_yrf=ss(A_d-B_d*K_SF,B_d,C_d,0,Ts);
         N=1/freqresp(TF_yrf,0);  % With integra action, N does not affect steady state, but on transient response
-                
-        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; C_d, Ad, zeros(size(C_d)); zeros(size(A_d)), zeros(size(B_d)), A_d-L_Pred*C_d];
-        BB= [B_d*N, B_d, Bw;-1., 0, 0; zeros(size(B_d)), B_d, Bw];
+        Bd = 1;
+        Ad = 1;
+        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; Bd * C_d, Ad, zeros(size(C_d)); zeros(size(A_d)), zeros(size(B_d)), A_d-L_Pred*C_d];
+        BB= [B_d*N, B_d, Bw;-Bd, 0, 0; zeros(size(B_d)), B_d, Bw];
         CC= [C_d, 0, zeros(size(C_d)); -K_SF, -K_int, K_SF; -C_d, 0, zeros(size(C_d))];
-        DD= [0 0 0; N 0 0;1, 0 0];       
+        DD= [0 0 0; N 0 0;1, 0 0];  
+     
         Loop_SF = ss(Aaug,Baug,K_aug,0,Ts);    
 
     case{'SOFCIO'}
         f = 2 * pi;
         osi_c = f / (s*(s^2 + f));
-        osi_d = c2d(osi_c,Ts,'zoh');
+        osi_d = c2d(osi_c,Ts,'matched');
         [num,dem] = tfdata(osi_d);
         [Ad,Bd,Cd,~] = ssdata(osi_d);
         Aaug = [A_d, zeros(size(A_d,1),size(Ad,2));Bd * C_d,Ad];
         Baug = [B_d;zeros(size(Bd))];
-        gamma = [0.9,0.8,0.7];
+        gamma = [1,1,1];
         pole_int = gamma*max(abs(pole_z_ctl));
         pole_z_ctl_int= [pole_z_ctl, pole_int];
         K_aug=acker(Aaug,Baug,pole_z_ctl_int);
         K_SF=K_aug(1:size(A_d,1));
         K_int = K_aug(size(A_d,1)+1:size(K_aug,2));
-
-        
-
-
-
-
+        num = num{1} .* [0 K_int];
+        dem = dem{1};
+        TF_yrf=ss(A_d-B_d*K_SF,B_d,C_d,0,Ts);
+        N=1/freqresp(TF_yrf,0);  % With integra action, N does not affect steady state, but on transient response
+        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; Bd * C_d, Ad, zeros(size(Bd,1),size(C_d,2)); zeros(size(A_d)), zeros(size(B_d,1),size(Bd,1)), A_d-L_Pred*C_d];
+        BB= [B_d*N, B_d, Bw;-Bd, zeros(size(Bd)), zeros(size(Bd)); zeros(size(B_d)), B_d, Bw];
+        CC= [C_d, zeros(size(K_int)), zeros(size(C_d)); -K_SF, -K_int, K_SF; -C_d, zeros(size(K_int)), zeros(size(C_d))];
+        DD= [0 0 0; N 0 0;1, 0 0];  
+        Loop_SF = ss(Aaug,Baug,K_aug,0,Ts); 
 
 end
 
