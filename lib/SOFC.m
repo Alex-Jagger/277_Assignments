@@ -16,20 +16,23 @@ function [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G
 G_d = c2d(G, Ts, 'zoh');
 [A_d, B_d, C_d, ~] = ssdata(G_d);
 Bw = F_rotorred*B_d;
-Ad = 1;
-Bd = 1;
-pole_s_obs = [(-Zeta_obs + sqrt(Zeta_obs^2-1))*Wn_obs,...
-    (-Zeta_obs-sqrt(Zeta_obs^2-1))*Wn_obs];
-pole_z_obs = exp(pole_s_obs*Ts);
-% if method == "Pole_Placement"
-% L_Pred = acker(A_d',C_d',pole_z_obs)';
-% else
-%     Q_obs = [10,0;0,1];
-%     R_obs = 1;
-%     [L_Pred,~,P_obs] = dlqr(A_d',C_d',Q_obs,R_obs);
-%     L_Pred = L_Pred';
 
-L_Pred = acker(A_d',C_d',pole_z_obs)';
+%% Observor Design
+switch(method)
+
+    case{'Pole_Placement'}  % Test Pole: 0.3897 0.3897
+        pole_s_obs = [(-Zeta_obs + sqrt(Zeta_obs^2-1))*Wn_obs,...
+            (-Zeta_obs-sqrt(Zeta_obs^2-1))*Wn_obs];
+        pole_z_obs = exp(pole_s_obs*Ts)
+        L_Pred = acker(A_d',C_d',pole_z_obs)'
+
+    case{'LQG'} % Test Pole: 0.3308+/-0.3350i (Close Enough to P_P method)
+        Q_obs = B_d*B_d';
+        R_obs = 1e-6;
+        [L_Pred,~,P_obs] = dlqr(A_d',C_d',Q_obs,R_obs)
+        L_Pred = L_Pred';
+end
+
 s = tf('s');
 Wn_ctl = 1.8/Tr_ctl; %rad/sec
 tmp = (log(Mp_ctl)/pi)^2;
