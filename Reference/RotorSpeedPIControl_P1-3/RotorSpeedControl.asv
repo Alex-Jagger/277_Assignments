@@ -1,0 +1,165 @@
+% Rotor-Pendulum Virtual Experiment: Run this section to initialize before running other sections
+% Author: Tsu-Chin Tsao, April 2020, April 2022
+
+clc;
+close all;
+clear all;
+
+% Rotor-Pendulum plant model
+% G_rotorspeed = kapa/(tau*s+1)  Velocity output reduced order model
+% G_rotorposition =kapa/(s*(tau*s+1))   Angle output reduced order model
+
+m=4.4*1E-2;       %(kg) Mass of pendulum
+g=9.81;           %(m/s^2) Gravitational acceleration
+l_c=2.54*1E-2;     %(m)Distance from pivot joint to the center of pendulum rod
+J_rodc=2.16*1E-5;  %(kgm^2) Moment of inertia of pendulum about center of rod
+J_motor=1.67*1E-6; %(kgm^2)  Moment of inertia of motor rotor
+J_rotor=J_rodc+J_motor;   %2.33*1E-5;  %(kgm^2)Moment of inertia of inertia mode of system
+J_dp=J_rotor+m*l_c^2 ;     %3.7494e-05 %8.54*1E-5;   %(kgm^2) Moment of inertia of downward pendulum mode of system
+J_ip=J_dp;          %(kgm^2)Moment of inertia of inverted pendulum mode of system
+b = 0;               % Motor-rotor viscous damping
+R=3.85;        % (Ohms)Motor coil resistant
+L=0.23e-3;             %(Henry) Motor coil inductance
+K_m=2.40E-2 ;          %(Nm/A) Motor torque constant
+V_s=12  ;          %(V)Supply voltage of the motor drive (H-bridge)
+                    % input d = Duty cycle
+
+s=tf('s');   %transfer function variable
+
+%plant model
+
+%Full order motor-rotor model (second order):
+P_rotorfull= (K_m*V_s)/((J_rotor*s+b)*(L*s+R)+K_m^2)  ;
+P_rotorposfull= P_rotorfull/s; 
+F_rotorfull=(L*s+R)/(K_m*V_s);
+zpk(P_rotorfull)
+hold on
+sgrid
+hold off
+
+%Reduced order motor-rotor model for control design (first order, assuming b=0,L=0):
+kapa=V_s/K_m;
+tau=J_rotor*R/K_m^2;
+P_rotorred=kapa/(tau*s+1);
+F_rotorred=R/(K_m*V_s);
+zpk(P_rotorred)
+figure(1)  %Open loop dynamics
+step(P_rotorfull,P_rotorred);
+grid
+figure
+bode(P_rotorfull,P_rotorred);
+grid
+
+open('RotorVirtualPlantModel_OpenLoop')
+sim('RotorVirtualPlantModel_OpenLoop')
+
+'Hit return to Continue to PI Control Design & Analysis'
+pause;
+
+
+
+
+%PI Velocity control:
+
+%design = 'rootlocus'  % design choice:'rootlocus','transientspecs'
+design = 'transientspecs'
+
+switch lower(design)
+
+   case {'rootlocus'}
+gain=1
+Kp=10000*gain;   %PI control adds a negative real zero and a pole at the origin
+zz = 1000;
+C = Kp*(s+zz)/s;  %Ki=zz/Kp
+
+
+    
+    case {'transientspecs'}
+
+%Closed loop Transient Specifications:
+
+Tr=0.01      % Rise time
+Mp=20/100   % Maximum percent overshoot
+%Tp =  0.01     % Peak time
+%Ts =  0.05     % Settling time (2%)  
+%Wb=    100*2*pi    % Closed loop bandwidth (radians)
+%PM=    50    % Phase Margin (degrees)
+
+% Calculate closed loop damping ratio and natural frequency:
+Wn=1.8/Tr %rad/sec
+tmp=(log(Mp)/pi)^2;
+Zeta=sqrt(tmp/(1+tmp));
+%Wd = pi/Tp;
+%Sig= 4/Ts;
+%Wn=sqrt(Sig^2+Wd^2);
+%Zeta=Wd/(2*Wn);
+%Wn=Wb    % rad/sec;
+%Zeta= PM/100;   %degrees
+
+%Closed loop pole:  tau s^2 + (1+kapa*Kp)*s+kapa*Ki=0
+%Wn^2=kapa*Ki/tau;
+%2*Zeta*Wn=(1+kapa*Kp)/tau);
+Ki= Wn^2*tau/kapa;
+Kp= (2*Zeta*Wn*tau-1)/kapa;
+C = Kp+Ki/s;
+C= 3*C;
+    end
+
+analysis ='reducedorderplant'
+analysis ='higherorderplant'
+
+switch lower(analysis)
+    case{'reducedorderplant'}
+G=P_rotorred;  %Used the reduced order plant model for control design
+F=F_rotorred;      
+    
+    case{'higherorderplant'}
+G=P_rotorfull;  %Used the reduced order plant model for c
+F=F_rotorfull;    
+
+    end
+ 
+
+%Analysis:
+%Connect the feedback system for Closed loop Analysis for the cases:
+
+ C.InputName = 'e';  C.OutputName = 'u';
+ G.InputName = 'u';  G.OutputName = 'y';
+ Sum = sumblk('e','r','y','+-');
+ T = connect(G,C,Sum,'r','y') ;
+ S = connect(G,C,Sum,'r','e');
+ SC= connect(G,C,Sum,'r','u') ;
+ 
+ C.InputName = 'y';  C.OutputName = 'u';
+ G.InputName = 'm';  G.OutputName = 'y';
+ Sum = sumblk('m','d','u','+-');
+ SG= connect(G,C,Sum,'d','y') ;
+
+Loop=G*C;
+ SGF=SG*F;
+ TF=T*F;
+ 
+ figure
+ step(T,S,SG,100*SC,0.05*TF,0.05*SGF);
+ legend('T','S','SG','100*SC','0.05*TF','0.05*SGF');
+ grid;
+ figure 
+ bode(T,S,SG,SC,TF,SGF);
+ legend('T','S','SG','SC','TF','SGF');
+ grid
+ figure
+ nyquist(Loop)
+ figure
+ bode(Loop)
+ grid
+ % Check the transient response specs.
+ stepinfo(T)
+ [Gm,Pm,Wcg,Wcp] = margin(Loop)  %These values should be checked against Nyquist or Bode plot of Loop=G*C
+ figure
+ rlocus(Loop)  %Root locus plot for 1+kGC=0, where k=1 is the designed PI controller
+ sgrid
+ 
+
+ % Closed loop simulation on virtual plant model
+ open('RotorVirtualPlantModel_ClosedLoop')
+ sim('RotorVirtualPlantModel_ClosedLoop')
