@@ -73,13 +73,15 @@ Plant_d = tf(G_d);
 Zeta_obs = 1; % Observer Damping Ratio
 Wn_obs = 150*2*pi; % Observer Natural Frequency
 Tr_ctl = 0.08; % Rise time 0.05
-Mp_ctl = 10/100; % Maximum percent overshoot 15%
+Mp_ctl = 15/100; % Maximum percent overshoot 15%
 
 design_lib = ["SOFC","SOFCI","SOFCIO"];
-design = design_lib(2);
+design = design_lib(3);
+methods = ["LQR","Pole_Placement"];
+method = methods(1);
 
 [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
-    Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design); %Get controller gain, observer gain and feedforward gain
+    Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design,method); %Get controller gain, observer gain and feedforward gain
 
 K_aug = [K_SF,K_int];
 TF_yr=TF(1,1)  ;

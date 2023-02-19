@@ -11,7 +11,7 @@
 %   K_SF: Control gain
 %   opt: Optional outputs
 function [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
-    Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design)
+    Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design,method)
 
 G_d = c2d(G, Ts, 'zoh');
 [A_d, B_d, C_d, ~] = ssdata(G_d);
@@ -21,6 +21,14 @@ Bd = 1;
 pole_s_obs = [(-Zeta_obs + sqrt(Zeta_obs^2-1))*Wn_obs,...
     (-Zeta_obs-sqrt(Zeta_obs^2-1))*Wn_obs];
 pole_z_obs = exp(pole_s_obs*Ts);
+% if method == "Pole_Placement"
+% L_Pred = acker(A_d',C_d',pole_z_obs)';
+% else
+%     Q_obs = [10,0;0,1];
+%     R_obs = 1;
+%     [L_Pred,~,P_obs] = dlqr(A_d',C_d',Q_obs,R_obs);
+%     L_Pred = L_Pred';
+
 L_Pred = acker(A_d',C_d',pole_z_obs)';
 s = tf('s');
 Wn_ctl = 1.8/Tr_ctl; %rad/sec
@@ -45,10 +53,17 @@ switch(design)
     case{'SOFCI'}
         Aaug=[A_d zeros(size(B_d)); C_d 1];
         Baug=[B_d;0];
-        gamma = 0.7;    %0<gamma<1 to select integrator pole faster than SF pole
-        pole_int = gamma*max(abs(pole_z_ctl));
-        pole_z_ctl_int= [pole_z_ctl, pole_int];
-        K_aug=acker(Aaug,Baug,pole_z_ctl_int);
+        if method == "Pole_Placement"
+            gamma = 0.7;    %0<gamma<1 to select integrator pole faster than SF pole
+            pole_int = gamma*max(abs(pole_z_ctl));
+            pole_z_ctl_int= [pole_z_ctl, pole_int];
+            K_aug=acker(Aaug,Baug,pole_z_ctl_int);
+        else
+            C_aug = [30,0.005,0.005];
+            Q = C_aug' * C_aug;
+            R = 10;
+            [K_aug,~,P_aug_ctr] = dlqr(Aaug,Baug,Q,R);
+        end
         K_SF=K_aug(1:size(A_d,1));
         K_int = K_aug(size(A_d,1)+1:size(K_aug,2));
         num = K_int;
@@ -66,16 +81,24 @@ switch(design)
 
     case{'SOFCIO'}
         f = 2 * pi;
-        osi_c = f / (s*(s^2 + f));
+        zeta_osi = 1;
+        osi_c = f^2 / (s*(s^2 +2 * zeta_osi *f * s + f^2));
         osi_d = c2d(osi_c,Ts,'matched');
         [num,dem] = tfdata(osi_d);
         [Ad,Bd,Cd,~] = ssdata(osi_d);
         Aaug = [A_d, zeros(size(A_d,1),size(Ad,2));Bd * C_d,Ad];
         Baug = [B_d;zeros(size(Bd))];
-        gamma = [1,1,1];
-        pole_int = gamma*max(abs(pole_z_ctl));
-        pole_z_ctl_int= [pole_z_ctl, pole_int];
-        K_aug=acker(Aaug,Baug,pole_z_ctl_int);
+        if method == "Pole_Placement"
+            gamma = [1,0.99,0.97];
+            pole_int = gamma*max(abs(pole_z_ctl));
+            pole_z_ctl_int= [pole_z_ctl, pole_int];
+            K_aug=acker(Aaug,Baug,pole_z_ctl_int);
+        else
+            C_aug = [30, 0, 0.005, 0.005, 0.005];
+            Q = C_aug' * C_aug;
+            R = 10;
+            [K_aug,~,P_aug_ctr] = dlqr(Aaug,Baug,Q,R);
+        end
         K_SF=K_aug(1:size(A_d,1));
         K_int = K_aug(size(A_d,1)+1:size(K_aug,2));
         num = num{1} .* [0 K_int];
