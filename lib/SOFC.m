@@ -46,7 +46,15 @@ pole_z_ctl = exp(pole_s_ctl*Ts);
 
 switch(design)
     case{'SOFC'}
-        K_SF = acker(A_d,B_d,pole_z_ctl);
+    
+        if method == "Pole_Placement"
+            K_SF = acker(A_d,B_d,pole_z_ctl);
+        else
+            Q = C_d'*C_d;
+            R = 1;
+            [K_SF,~,P_ctl] = dlqr(A_d,B_d,Q,R);
+        end
+
         K_int = 0;
         TF_yrf=ss(A_d-B_d*K_SF,B_d,C_d,[],Ts);
         N=1/freqresp(TF_yrf,0);   %Scale the feedforward gain N to make dc gain y/r=1
