@@ -16,20 +16,23 @@ function [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G
 G_d = c2d(G, Ts, 'zoh');
 [A_d, B_d, C_d, ~] = ssdata(G_d);
 Bw = F_rotorred*B_d;
-
+num = 0;
+dem = 0;
+Ad = 1;
+Bd = 1;
 %% Observor Design
 switch(method)
 
-    case{'Pole_Placement'}  % Test Pole: 0.3897 0.3897
+    case{'Pole Placement'}  % Test Pole: 0.3897 0.3897
         pole_s_obs = [(-Zeta_obs + sqrt(Zeta_obs^2-1))*Wn_obs,...
             (-Zeta_obs-sqrt(Zeta_obs^2-1))*Wn_obs];
-        pole_z_obs = exp(pole_s_obs*Ts)
-        L_Pred = acker(A_d',C_d',pole_z_obs)'
+        pole_z_obs = exp(pole_s_obs*Ts);
+        L_Pred = acker(A_d',C_d',pole_z_obs)';
 
     case{'LQG'} % Test Pole: 0.3308+/-0.3350i (Close Enough to P_P method)
         Q_obs = B_d*B_d';
         R_obs = 1e-6;
-        [L_Pred,~,P_obs] = dlqr(A_d',C_d',Q_obs,R_obs)
+        [L_Pred,~,P_obs] = dlqr(A_d',C_d',Q_obs,R_obs);
         L_Pred = L_Pred';
 end
 
@@ -56,7 +59,7 @@ switch(design)
     case{'SOFCI'}
         Aaug=[A_d zeros(size(B_d)); C_d 1];
         Baug=[B_d;0];
-        if method == "Pole_Placement"
+        if method == "Pole Placement"
             gamma = 0.7;    %0<gamma<1 to select integrator pole faster than SF pole
             pole_int = gamma*max(abs(pole_z_ctl));
             pole_z_ctl_int= [pole_z_ctl, pole_int];
@@ -97,7 +100,7 @@ switch(design)
             pole_z_ctl_int= [pole_z_ctl, pole_int];
             K_aug=acker(Aaug,Baug,pole_z_ctl_int);
         else
-            C_aug = [30, 0, 0.005, 0.005, 0.005];
+            C_aug = [60, 0, 0.005, 0.005, 0.005];
             Q = C_aug' * C_aug;
             R = 10;
             [K_aug,~,P_aug_ctr] = dlqr(Aaug,Baug,Q,R);
