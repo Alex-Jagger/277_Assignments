@@ -3,27 +3,28 @@ clear; close all; clc
 init
 %% Our Virtual Plant %Simulation Time = 5s
 load_our_parameters
+load_hardware_parameters
 TS =  [0.01,0.001];
 fre = ["100 Hz","1000 Hz"];
 k = 1;
-for i = 1:2
-    Ts = TS(i);
+% for i = 1:2
+    Ts = TS(2);
     %Parameters in the virtual plant simulation:
     Tcomp=0.0005*Ts*14;  %controller computation delay (less than one sampling interval)
     Tss= 1/10000;       % 10kHz Encoder sampling rate by FPGA
     encoder_resolution= 2*pi/2000;  % Encoder resolution 2000 counts/revolutin
     
-    Angle_Pendu=180/180*pi;   %pendulum equlibrium position, 0 is vertically down, 180 is up
+    Angle_Pendu=0/180*pi;   %pendulum equlibrium position, 0 is vertically down, 180 is up
     
     K_g =  m*g*l_c;
     K_sin = cos(Angle_Pendu);  %linearization sin(angle)
     
     % Lookup Table for Nonlinear Parameters
-    V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
-    DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
-    friction_static = 3.93E-4; %Static friction
-    friction_viscous = 8.347E-7; %Viscous friction
-    friction_aero = 8.765E-9; %Aerodynamics friction
+%     V_table = [-10.57,-10.57,-9.66,-9.04,-0.05,0,0.05,9.04,9.66,10.57,10.57];
+%     DC_table = [-1,-0.972,-0.96,-0.7,-0.02,0,0.02,0.7,0.96,0.972,1];
+%     friction_static = 3.93E-4; %Static friction
+%     friction_viscous = 8.347E-7; %Viscous friction
+%     friction_aero = 8.765E-9; %Aerodynamics friction
     % V_table = [-10.8,-10.8,-2,-1,-0,0,0,1,2,10.8,10.8];
     % DC_table = [-1,-0.96,-0.1,-0.06,-0.04,0,0.04,0.06,0.1,0.96,1];
     
@@ -87,8 +88,9 @@ for i = 1:2
         
         [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
             Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design,method); %Get controller gain, observer gain and feedforward gain
-        
-        WeK_aug = [K_SF,K_int];
+        K_SF
+        L_Pred
+        K_aug = [K_SF,K_int]
         TF_yr=TF(1,1)  ;
         TF_ur=TF(2,1)  ;
         TF_er=TF(3,1)  ;
@@ -162,73 +164,36 @@ for i = 1:2
         plotname = eval(strcat('12',int2str(k)));
 %         [Gm,Pm,Wcp,Wcg] = margin(Loop);
         
-        figure(4)
-        subplot(plotname)
-        nyquist(Loop);
-        title(strcat(fre(i)," Nyquist using ",method," ",plot_lib));
-        grid on
-        
-        figure(5)
-        subplot(plotname)
-        bode(Loop);
-        title(strcat(fre(i), " Loop Gain using ",method," ", plot_lib));
-        grid on
-        
-        
-        [Gm_SF,Pm_SF,Wcp_SF,Wcg_SF] = margin(Loop_SF);
-        Sensitivity= 1/(1+Loop);
-        Sensitivity_SF= 1/(1+Loop_SF);
-        
-        figure(6);
-        subplot(plotname)
-        bodemag(Sensitivity);
-        title(strcat(fre(i)," Sensitivity using ",method," ",plot_lib));
-        % hold on
-        % bodemag(Sensitivity_SF);
-        grid on;
-        % legend('Sensitivity: SF with Obs','Sensitivity: SF Only');
-        temp{i} = pole(tf(Loop));
-        k = k + 1;
+%         figure(4)
+%         subplot(plotname)
+%         nyquist(Loop);
+%         title(strcat(fre(i)," Nyquist using ",method," ",plot_lib));
+%         grid on
+%         
+%         figure(5)
+%         subplot(plotname)
+%         bode(Loop);
+%         title(strcat(fre(i), " Loop Gain using ",method," ", plot_lib));
+%         grid on
+%         
+%         
+%         [Gm_SF,Pm_SF,Wcp_SF,Wcg_SF] = margin(Loop_SF);
+%         Sensitivity= 1/(1+Loop);
+%         Sensitivity_SF= 1/(1+Loop_SF);
+%         
+%         figure(6);
+%         subplot(plotname)
+%         bodemag(Sensitivity);
+%         title(strcat(fre(i)," Sensitivity using ",method," ",plot_lib));
+%         % hold on
+%         % bodemag(Sensitivity_SF);
+%         grid on;
+%         % legend('Sensitivity: SF with Obs','Sensitivity: SF Only');
+%         temp{i} = pole(tf(Loop));
+%         k = k + 1;
     end
-end
-%% Simulation
-
-
-% test = 'openloop'; % Simulation Type
-% test = 'SOFC';
-
-% switch(test)
-%     case{'openloop'}
-%         open('OpenLoop_simulation');
-%         out = sim('OpenLoop_simulation');
-%         save(['F:\！！！UCLA学习与课程\#####2023 Winter Quarter\' ...
-%             '277 - Advanced Digital Control for Mechatronic Systems\' ...
-%             '277_Assignment_Charles\277_Assignments\data\our_model_data\our_open_loop\' ...
-%             'our_',mode,'_OpenLoop_step_',stepsize,'_response_',num2str(1/Ts),'Hz.mat'],'out')
-%     case{'SOFC'}
-%         open('SOFC_simulation')
-%         out = sim('SOFC_simulation');
-%         save(['F:\！！！UCLA学习与课程\#####2023 Winter Quarter\' ...
-%             '277 - Advanced Digital Control for Mechatronic Systems\' ...
-%             '277_Assignment_Charles\277_Assignments\data\our_model_data\our_SOFC\' ...
-%             'our_',mode,'_SOFC_',stepsize,'_response_',num2str(1/Ts),'Hz.mat'],'out')
 % end
-
-
-% steptime = 10;
-% stepinput = 1;
-% stoptime = 20;
 %%
-% ref = step_time_response_test2{1}.Values.Data;
-% y_m_real = step_time_response_test2{2}.Values.Data;
-% y_m_real_ts = step_time_response_test2{2}.Values;
-% 
-% %%
-% tspan = linspace(0, 10, 10001) + 9;
-% %%
-% figure; hold on; grid on
-% plot(tspan, y_m_L, 'LineWidth', 1.5)
-% plot(tspan, y_m_NL, 'LineWidth', 1.5)
-% plot(step_time_response_test2{2}.Values, 'LineWidth', 1.5)
-% xlim([4 18])
-% legend('Simulation Linear', 'Simulation Non-Linear','Experiment')
+time_ref = 10;
+time_dist = 15;
+time_final = 20;
