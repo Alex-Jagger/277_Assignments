@@ -46,7 +46,15 @@ pole_z_ctl = exp(pole_s_ctl*Ts);
 
 switch(design)
     case{'SOFC'}
-        K_SF = acker(A_d,B_d,pole_z_ctl);
+    
+        if method == "Pole Placement"
+            K_SF = acker(A_d,B_d,pole_z_ctl);
+        else
+            Q = C_d'*C_d;
+            R = 1;
+            [K_SF,~,P_ctl] = dlqr(A_d,B_d,Q,R);
+        end
+
         K_int = 0;
         TF_yrf=ss(A_d-B_d*K_SF,B_d,C_d,[],Ts);
         N=1/freqresp(TF_yrf,0);   %Scale the feedforward gain N to make dc gain y/r=1
@@ -87,7 +95,7 @@ switch(design)
 
     case{'SOFCIO'}
         f = 2 * pi;
-        zeta_osi = 1;
+        zeta_osi = 0;
         osi_c = f^2 / (s*(s^2 +2 * zeta_osi *f * s + f^2));
         osi_d = c2d(osi_c,Ts,'matched');
         [num,dem] = tfdata(osi_d);
@@ -100,7 +108,7 @@ switch(design)
             pole_z_ctl_int= [pole_z_ctl, pole_int];
             K_aug=acker(Aaug,Baug,pole_z_ctl_int);
         else
-            C_aug = [60, 0, 0.005, 0.005, 0.005];
+            C_aug = [30, 0, 0.005, 0.005, 0.005];
             Q = C_aug' * C_aug;
             R = 10;
             [K_aug,~,P_aug_ctr] = dlqr(Aaug,Baug,Q,R);
