@@ -47,7 +47,7 @@ pole_z_ctl = exp(pole_s_ctl*Ts);
 switch(design)
     case{'SOFC'}
     
-        if method == "Pole_Placement"
+        if method == "Pole Placement"
             K_SF = acker(A_d,B_d,pole_z_ctl);
         else
             Q = C_d'*C_d;
@@ -95,7 +95,7 @@ switch(design)
 
     case{'SOFCIO'}
         f = 2 * pi;
-        zeta_osi = 1;
+        zeta_osi = 0;
         osi_c = f^2 / (s*(s^2 +2 * zeta_osi *f * s + f^2));
         osi_d = c2d(osi_c,Ts,'matched');
         [num,dem] = tfdata(osi_d);
@@ -108,7 +108,7 @@ switch(design)
             pole_z_ctl_int= [pole_z_ctl, pole_int];
             K_aug=acker(Aaug,Baug,pole_z_ctl_int);
         else
-            C_aug = [60, 0, 0.005, 0.005, 0.005];
+            C_aug = [30, 0, 0.005, 0.005, 0.005];
             Q = C_aug' * C_aug;
             R = 10;
             [K_aug,~,P_aug_ctr] = dlqr(Aaug,Baug,Q,R);

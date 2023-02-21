@@ -78,9 +78,9 @@ for i = 1:2
     Mp_ctl = 15/100; % Maximum percent overshoot 15%
     
     design_lib = ["SOFC","SOFCI","SOFCIO"];
-    design = design_lib(3);
+    design = design_lib(2);
     plot_libs = ["Without Internal Model","With Integrator Only","With Integrator + Oscillator"];
-    plot_lib = plot_libs(3);
+    plot_lib = plot_libs(2);
     methods = ["LQG","Pole Placement"];
     for j = 1:1
         method = methods(j);
@@ -88,7 +88,7 @@ for i = 1:2
         [L_Pred, K_SF, N, K_int, Loop_SF, SS_closed, TF,num,dem,Ad,Bd] = SOFC(G,...
             Ts, Zeta_obs, Wn_obs, Tr_ctl, Mp_ctl, F_rotorred, design,method); %Get controller gain, observer gain and feedforward gain
         
-        K_aug = [K_SF,K_int];
+        WeK_aug = [K_SF,K_int];
         TF_yr=TF(1,1)  ;
         TF_ur=TF(2,1)  ;
         TF_er=TF(3,1)  ;
@@ -128,10 +128,8 @@ for i = 1:2
                 Controller_int = K_int/(z-1)*(1-ss(A_d-B_d*K_SF-L_Pred*C_d,B_d,K_SF,0,Ts));
                 state_order = size(A_d,1)+size(A_d,1) + 1;
             case{'SOFCIO'}
-                f = 2 * pi;
-                zeta_osi = 0;
-                osi_c = f^2 / (s*(s^2 +2 * zeta_osi *f * s + f^2));
-                osi_d = c2d(osi_c,Ts,'matched');
+                osi_d = tf(num,dem,Ts);
+%                 osi_d = c2d(osi_c,Ts,'matched');
                 Controller_int = osi_d* (1-ss(A_d-B_d*K_SF-L_Pred*C_d,B_d,K_SF,0,Ts));
                 state_order = size(A_d,1)+size(A_d,1)+3;
         end
