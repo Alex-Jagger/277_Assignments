@@ -1,9 +1,0 @@
-clear; close all; clc
-%%
-init
-%% Our Virtual Plant %Simulation Time = 5s
-% 
-load_our_parameters
-load_hardware_parameters
-
-%% 
