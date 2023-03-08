@@ -13,7 +13,7 @@ methods = ["LQG","Pole Placement"];
 method = methods(1);
 
 signal_list = ["step", "sine", "square", "trig"];
-signal_num = 1; % 1: step, 2: Sine, 3: Square
+signal_num = 2; % 1: step, 2: Sine, 3: Square
 signal = signal_list(signal_num);
 
 file_name_data = design + "_" + signal
@@ -40,9 +40,8 @@ K_sin = cos(Angle_Pendu);  %linearization sin(angle)
 Mode_all = ["rotor","pendulum"];
 Mode = Mode_all(2); % Selct different mode to present different task
 
-
-K_pend = 0;  %K_pend=0 for the rotor mode
-J_pend =J_rotor;  % If this is for the rotor, treat as a special case of pendulum
+K_pend = 1;
+J_pend = J_rotor + m*l_c^2;
 
 K_tot = K_g*K_sin*K_pend;
 s = tf('s');

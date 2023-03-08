@@ -65,8 +65,9 @@ switch(design)
         Loop_SF =ss(A_d,B_d,K_SF,0,Ts);
 
     case{'SOFCI'}
-        Aaug=[A_d zeros(size(B_d)); C_d 1];
-        Baug=[B_d;0];
+        Aaug = [A_d   zeros(size(B_d)); 
+                C_d     1];
+        Baug = [B_d; 0];
         if method == "Pole Placement"
             gamma = 0.7;    %0<gamma<1 to select integrator pole faster than SF pole
             pole_int = gamma*max(abs(pole_z_ctl));
@@ -86,21 +87,32 @@ switch(design)
         N=1/freqresp(TF_yrf,0);  % With integra action, N does not affect steady state, but on transient response
         Bd = 1;
         Ad = 1;
-        AA= [A_d-B_d*K_SF, -B_d*K_int,  B_d*K_SF; Bd * C_d, Ad, zeros(size(C_d)); zeros(size(A_d)), zeros(size(B_d)), A_d-L_Pred*C_d];
-        BB= [B_d*N, B_d, Bw;-Bd, 0, 0; zeros(size(B_d)), B_d, Bw];
-        CC= [C_d, 0, zeros(size(C_d)); -K_SF, -K_int, K_SF; -C_d, 0, zeros(size(C_d))];
-        DD= [0 0 0; N 0 0;1, 0 0];  
+        AA= [A_d-B_d*K_SF       -B_d*K_int          B_d*K_SF;
+            Bd*C_d              Ad                  zeros(size(C_d)); 
+            zeros(size(A_d))    zeros(size(B_d))    A_d-L_Pred*C_d];
+
+        BB= [B_d*N              B_d     Bw;
+            -Bd                 0       0; 
+            zeros(size(B_d))    B_d     Bw];
+
+        CC= [C_d    0       zeros(size(C_d)); 
+            -K_SF   -K_int  K_SF;
+            -C_d    0       zeros(size(C_d))];
+        DD= [0  0   0; 
+            N   0   0;
+            1   0   0];  
      
         Loop_SF = ss(Aaug,Baug,K_aug,0,Ts);    
 
     case{'SOFCIO'}
-        f = 2 * pi;
+        f = 2*pi;
         zeta_osi = 0;
-        osi_c = f^2 / (s*(s^2 +2 * zeta_osi *f * s + f^2));
+        osi_c = f^2/(s*(s^2 + 2*zeta_osi*f*s + f^2));
         osi_d = c2d(osi_c,Ts,'matched');
         [num,dem] = tfdata(osi_d);
         [Ad,Bd,Cd,~] = ssdata(osi_d);
-        Aaug = [A_d, zeros(size(A_d,1),size(Ad,2));Bd * C_d,Ad];
+        Aaug = [A_d         zeros(size(A_d,1),size(Ad,2));
+                Bd*C_d      Ad];
         Baug = [B_d;zeros(size(Bd))];
         if method == "Pole_Placement"
             gamma = [1,0.99,0.97];
