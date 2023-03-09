@@ -53,6 +53,8 @@ F = z*(1-1.905*z^-1+0.9111*z^-2)*(1+0.9694*z)/...
     (0.0029603*(1+0.9694)^2); % Given by Inverse TF_yr
 
 N1 = 2;   %F*z^-N1 to be causal
+NF = 2;
+
 F = minreal(F*z^-N1);
 F = F / dcgain(F*TF_yr); % Normalization of dagain
 
@@ -68,6 +70,12 @@ Qzpet_den = [Q.Denominator{1}(mm+1:end) zeros(1, mm)];
 Q_coe = Qzpet_num/Q.Denominator{1}(mm+1);
 N2 = mm;   %Q*z^-N2 to be causal
 Np = 1/Ts;
+
+% W Block Design
+Nw = 25;
+W = ((aa*z + bb + aa*z^-1)/(bb + 2*aa))^Nw;
+W_coe = W.Numerator{1}/W.Denominator{1}(Nw+1);
+NF = NF + Nw;
 save("../../../data/REPFF_system_id_controller", "Np", "N1", "N2", "Fzpet_num", "Fzpet_den", "Q_coe", "Qzpet_den", "Qzpet_num")
 %%
 Stepsize = 0.4;
